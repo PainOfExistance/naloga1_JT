@@ -9,38 +9,41 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-// Define the structure to hold the page and paragraph information
 struct Paragraph {
     string id;
     string text;
 };
 
-// Define the structure to hold the classification results
 struct Classification {
     string id;
     string classType;
 };
 
-// Function to classify the paragraphs
 vector<Classification> classifyParagraphs(const vector<Paragraph> &paragraphs) {
     vector<Classification> classifications;
-    map<string, string> classMap;
+    vector<Classification> segments;
+    vector<Classification> chapters;
 
-    // Regular expressions for different sections
     regex titlePageRegex(R"(UNIVERZA|EKONOMSKA FAKULTETA|DIPLOMSKO DELO)");
-    regex tocRegex(R"(KAZALO|CONTENTS)");
+    regex forewordRegex(R"(PREDGOVOR|FOREWORD)");
+    regex tocRegex(R"(KAZALO|CONTENTS|\.\.\.\.\.\.\.\.\.\.)");
     regex abstractSloRegex(R"(POVZETEK)");
     regex abstractEnRegex(R"(ABSTRACT)");
-    regex chapterRegex(R"(POGLAVJE|CHAPTER)");
+    regex chapterRegex(R"(>\d+ [Aa-Zz]<)");
     regex conclusionRegex(R"(SKLEP|CONCLUSION)");
-    regex bibliographyRegex(R"(LITERATURA|BIBLIOGRAPHY)");
-    regex acronymRegex(R"(HTML|LaTeX|FERI)");
+    regex bibliographyRegex(R"(LITERATURA|BIBLIOGRAPHY|\[\d+\])");
+    regex acronymRegex(R"(KLJUČNE|LaTeX|FERI)");
+
+    string prevID = "";
+    string prevClassType = "";
 
     for (const auto &paragraph: paragraphs) {
-        string classType = "body"; // Default classification
+        string classType = "body";
 
         if (regex_search(paragraph.text, titlePageRegex)) {
             classType = "titlePage";
+        } else if (regex_search(paragraph.text, forewordRegex)) {
+            classType = "foreword";
         } else if (regex_search(paragraph.text, tocRegex)) {
             classType = "toc";
         } else if (regex_search(paragraph.text, abstractSloRegex)) {
@@ -57,13 +60,54 @@ vector<Classification> classifyParagraphs(const vector<Paragraph> &paragraphs) {
             classType = "acronym";
         }
 
-        classifications.push_back({paragraph.id, classType});
+        if (classType == "body" && prevID.substr(0, prevID.find('.')) == paragraph.id.
+            substr(0, paragraph.id.find('.'))) {
+            classifications.push_back({paragraph.id, prevClassType});
+            prevClassType = classType;
+        } else {
+            classifications.push_back({paragraph.id, classType});
+            prevClassType = classType;
+        }
+
+
+        if (prevID.substr(0, prevID.find('.')) == paragraph.id.substr(0, paragraph.id.find('.'))) {
+            continue;
+        }
+
+        if (prevID.substr(0, prevID.find('.')) != paragraph.id.substr(0, paragraph.id.find('.'))) {
+            if (classType == "titlePage" || classType == "toc" || classType == "foreword") {
+                segments.push_back({paragraph.id.substr(0, paragraph.id.find('.')), "front"});
+            } else if (classType == "abstractSlo" || classType == "abstractEn" || classType == "conclusion" || classType
+                       == "bibliography" || classType == "acronym") {
+                segments.push_back({paragraph.id.substr(0, paragraph.id.find('.')), "back"});
+            } else {
+                segments.push_back({paragraph.id.substr(0, paragraph.id.find('.')), "body"});
+            }
+        }
+
+
+        if (regex_search(paragraph.text, chapterRegex)) {
+            chapters.push_back({
+                paragraph.id.substr(0, paragraph.id.find('.')),
+                paragraph.text.substr(paragraph.id.find('>'), paragraph.id.find('<'))
+            });
+        }
+
+        prevID = paragraph.id;
+    }
+
+
+    for (const auto &seg: segments) {
+        classifications.push_back({seg.id, seg.classType});
+    }
+
+    for (const auto &chapter: chapters) {
+        classifications.push_back({chapter.id, chapter.classType});
     }
 
     return classifications;
 }
 
-// Function to read the XML file and extract paragraphs
 vector<Paragraph> readXML(const string &filename) {
     ifstream file(filename);
     vector<Paragraph> paragraphs;
@@ -82,9 +126,8 @@ vector<Paragraph> readXML(const string &filename) {
     return paragraphs;
 }
 
-// Function to write the classification results to a file
 void writeResults(const string &filename, const vector<Classification> &classifications) {
-    ofstream file("results/" + filename);
+    ofstream file(filename);
     file << "ID CLASS\n";
     for (const auto &classification: classifications) {
         file << classification.id << " " << classification.classType << "\n";
@@ -101,23 +144,15 @@ vector<string> listFilesInDirectory(const string &directoryPath) {
     return fileList;
 }
 
-vector<string> getFileNames(const vector<string>& filePaths) {
-    vector<string> fileNames;
-    for (const auto& filePath : filePaths) {
-        fileNames.push_back(fs::path(filePath).stem().string());
-    }
-    return fileNames;
-}
-
 int main() {
     vector<string> filenames = listFilesInDirectory("korpus/");
 
     for (const auto &filename: filenames) {
         vector<Paragraph> paragraphs = readXML(filename);
         vector<Classification> classifications = classifyParagraphs(paragraphs);
-        //replace(filename.find("korpus"), 6, "results");
-        writeResults(filename + ".res", classifications);
-        cout << "Classification completed. Results written to results/" + filename + ".res" << endl;
+        writeResults("results" + filename.substr(6, filename.length()) + ".res", classifications);
+        cout << "Classification completed. Results written to results" + filename.substr(6, filename.length()) + ".res"
+                << endl;
     }
 
     return 0;
