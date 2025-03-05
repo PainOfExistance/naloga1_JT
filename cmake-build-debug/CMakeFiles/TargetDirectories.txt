@@ -1,3 +1,3 @@
-G:/Faks/Magisterij/1.letnik/2.semester/JT/naloga1/cmake-build-debug/CMakeFiles/naloga1.dir
-G:/Faks/Magisterij/1.letnik/2.semester/JT/naloga1/cmake-build-debug/CMakeFiles/edit_cache.dir
-G:/Faks/Magisterij/1.letnik/2.semester/JT/naloga1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/MatejPC/Desktop/Sola/magisterij/2.letnik/JT/naloga1_JT/cmake-build-debug/CMakeFiles/naloga1.dir
+C:/Users/MatejPC/Desktop/Sola/magisterij/2.letnik/JT/naloga1_JT/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/MatejPC/Desktop/Sola/magisterij/2.letnik/JT/naloga1_JT/cmake-build-debug/CMakeFiles/rebuild_cache.dir
