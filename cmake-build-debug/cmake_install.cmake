@@ -1,4 +1,4 @@
-# Install script for directory: G:/Faks/Magisterij/1.letnik/2.semester/JT/naloga1
+# Install script for directory: C:/Users/MatejPC/Desktop/Sola/magisterij/2.letnik/JT/naloga1_JT
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -52,6 +52,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "G:/Faks/Magisterij/1.letnik/2.semester/JT/naloga1/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "C:/Users/MatejPC/Desktop/Sola/magisterij/2.letnik/JT/naloga1_JT/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

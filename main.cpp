@@ -19,20 +19,28 @@ struct Classification {
     string classType;
 };
 
+bool contains(vector<Classification> paragraphs, string classType) {
+    for (int i = 0; i < paragraphs.size(); i++) {
+        if (paragraphs[i].classType == classType) {
+            return true;
+        }
+    }
+    return false;
+}
+
 vector<Classification> classifyParagraphs(const vector<Paragraph> &paragraphs) {
     vector<Classification> classifications;
     vector<Classification> segments;
     vector<Classification> chapters;
 
-    regex titlePageRegex(R"(UNIVERZA|EKONOMSKA FAKULTETA|DIPLOMSKO DELO)");
-    regex forewordRegex(R"(PREDGOVOR|FOREWORD)");
-    regex tocRegex(R"(KAZALO|CONTENTS|\.\.\.\.\.\.\.\.\.\.)");
-    regex abstractSloRegex(R"(POVZETEK)");
-    regex abstractEnRegex(R"(ABSTRACT)");
-    regex chapterRegex(R"(>\d+ [Aa-Zz]<)");
-    regex conclusionRegex(R"(SKLEP|CONCLUSION)");
-    regex bibliographyRegex(R"(LITERATURA|BIBLIOGRAPHY|\[\d+\])");
-    regex acronymRegex(R"(KLJUČNE|LaTeX|FERI)");
+    regex titlePageRegex(R"(UNIVERZA|EKONOMSKA FAKULTETA|DIPLOMSKO DELO)", std::regex_constants::icase);
+    regex tocRegex(R"(KAZALO|CONTENTS|\.\.\.\.\.\.\.\.\.\.)", std::regex_constants::icase);
+    regex toaRegex(R"(KAZALO KRATIC)", std::regex_constants::icase);
+    regex abstractSloRegex(R"(POVZETEK)", std::regex_constants::icase);
+    regex abstractEnRegex(R"(ABSTRACT)", std::regex_constants::icase);
+    regex abstractDeRegex(R"(ABSTRACT)", std::regex_constants::icase);
+    regex chapterRegex(R"(>\d+ [A-Za-z \s]+<)", std::regex_constants::icase);
+    regex conclusionRegex(R"(>\d+ [SKLEP \s]+<|>\d+ [CONCLUSION \s]+<)", std::regex_constants::icase);
 
     string prevID = "";
     string prevClassType = "";
@@ -42,43 +50,46 @@ vector<Classification> classifyParagraphs(const vector<Paragraph> &paragraphs) {
 
         if (regex_search(paragraph.text, titlePageRegex)) {
             classType = "titlePage";
-        } else if (regex_search(paragraph.text, forewordRegex)) {
-            classType = "foreword";
         } else if (regex_search(paragraph.text, tocRegex)) {
             classType = "toc";
+        } else if (regex_search(paragraph.text, toaRegex)) {
+            classType = "toa";
         } else if (regex_search(paragraph.text, abstractSloRegex)) {
             classType = "abstractSlo";
         } else if (regex_search(paragraph.text, abstractEnRegex)) {
             classType = "abstractEn";
-        } else if (regex_search(paragraph.text, chapterRegex)) {
-            classType = "chapter";
         } else if (regex_search(paragraph.text, conclusionRegex)) {
             classType = "conclusion";
-        } else if (regex_search(paragraph.text, bibliographyRegex)) {
-            classType = "bibliography";
-        } else if (regex_search(paragraph.text, acronymRegex)) {
-            classType = "acronym";
+        } else if (regex_search(paragraph.text, chapterRegex)) {
+            classType = "chapter";
         }
 
         if (classType == "body" && prevID.substr(0, prevID.find('.')) == paragraph.id.
             substr(0, paragraph.id.find('.'))) {
             classifications.push_back({paragraph.id, prevClassType});
-            prevClassType = classType;
+        } else if (!contains(classifications, "chapter") && classType == "body") {
+            classifications.push_back({paragraph.id, "front"});
+            prevClassType = "front";
+        } else if (classifications.size() > 0 && contains(classifications, "chapter") && !contains(classifications, "conclusion") && classType == "body") {
+            classifications.push_back({paragraph.id, "body"});
+            prevClassType = "body";
+        } else if (classifications.size() > 0 && classifications.end()->classType != "chapter" && classType == "body") {
+            classifications.push_back({paragraph.id, "back"});
+            prevClassType = "back";
         } else {
             classifications.push_back({paragraph.id, classType});
             prevClassType = classType;
         }
 
 
-        if (prevID.substr(0, prevID.find('.')) == paragraph.id.substr(0, paragraph.id.find('.'))) {
+        /*if (prevID.substr(0, prevID.find('.')) == paragraph.id.substr(0, paragraph.id.find('.'))) {
             continue;
         }
 
-        if (prevID.substr(0, prevID.find('.')) != paragraph.id.substr(0, paragraph.id.find('.'))) {
-            if (classType == "titlePage" || classType == "toc" || classType == "foreword") {
+        if (prevID.substr(0, prevID.find('.')) != paragraph.id.substr(0, paragraph.id.find('.')) && classType == "body") {
+            if (classType == "titlePage" || classType == "toc" || classType == "toa") {
                 segments.push_back({paragraph.id.substr(0, paragraph.id.find('.')), "front"});
-            } else if (classType == "abstractSlo" || classType == "abstractEn" || classType == "conclusion" || classType
-                       == "bibliography" || classType == "acronym") {
+            } else if (classType == "abstractSlo" || classType == "abstractEn" || classType == "abstractDe" || classType == "conclusion") {
                 segments.push_back({paragraph.id.substr(0, paragraph.id.find('.')), "back"});
             } else {
                 segments.push_back({paragraph.id.substr(0, paragraph.id.find('.')), "body"});
@@ -91,19 +102,20 @@ vector<Classification> classifyParagraphs(const vector<Paragraph> &paragraphs) {
                 paragraph.id.substr(0, paragraph.id.find('.')),
                 paragraph.text.substr(paragraph.id.find('>'), paragraph.id.find('<'))
             });
-        }
+        }*/
 
         prevID = paragraph.id;
     }
 
+    /*
+        for (const auto &seg: segments) {
+            classifications.push_back({seg.id, seg.classType});
+        }
 
-    for (const auto &seg: segments) {
-        classifications.push_back({seg.id, seg.classType});
-    }
-
-    for (const auto &chapter: chapters) {
-        classifications.push_back({chapter.id, chapter.classType});
-    }
+        for (const auto &chapter: chapters) {
+            classifications.push_back({chapter.id, chapter.classType});
+        }
+    */
 
     return classifications;
 }
@@ -119,7 +131,7 @@ vector<Paragraph> readXML(const string &filename) {
         if (regex_search(line, match, paragraphRegex)) {
             string id = match[1];
             string text = match[2];
-            paragraphs.push_back({id, text});
+            paragraphs.push_back({id, line});
         }
     }
 
