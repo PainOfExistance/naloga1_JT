@@ -783,7 +783,7 @@ pb68.p11 toc
 pb68.p12 toc
 pb68.p13 toc
 pb68.p14 toc
-pb69.p1 front
-pb69.p2 front
-pb69.p3 front
-pb69.p4 front
+pb69.p1 toa
+pb69.p2 toa
+pb69.p3 toa
+pb69.p4 toa

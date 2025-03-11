@@ -241,9 +241,9 @@ pb48.p3 body
 pb48.p4 body
 pb48.p5 body
 pb49.p1 body
-pb49.p2 body
-pb49.p3 body
-pb49.p4 body
+pb49.p2 abstractDe
+pb49.p3 abstractDe
+pb49.p4 abstractDe
 pb50.p1 body
 pb50.p2 body
 pb50.p3 body

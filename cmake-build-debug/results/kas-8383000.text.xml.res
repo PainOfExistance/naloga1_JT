@@ -45,9 +45,9 @@ pb10.p7 front
 pb10.p8 front
 pb10.p9 front
 pb10.p10 front
-pb11.p1 front
-pb11.p2 front
-pb11.p3 front
+pb11.p1 toa
+pb11.p2 toa
+pb11.p3 toa
 pb12.p1 chapter
 pb12.p2 chapter
 pb12.p3 chapter

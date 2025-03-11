@@ -36,7 +36,7 @@ pb7.p6 abstractEn
 pb8.p1 toc
 pb8.p2 abstractEn
 pb8.p3 abstractEn
-pb8.p4 abstractEn
+pb8.p4 abstractDe
 pb9.p1 titlePage
 pb10.p1 front
 pb10.p2 front
@@ -400,11 +400,11 @@ pb45.p9 body
 pb45.p10 body
 pb46.p1 body
 pb47.p1 body
-pb47.p2 body
-pb47.p3 body
-pb47.p4 body
-pb47.p5 body
-pb47.p6 body
+pb47.p2 abstractDe
+pb47.p3 abstractDe
+pb47.p4 abstractDe
+pb47.p5 abstractDe
+pb47.p6 abstractDe
 pb48.p1 body
 pb48.p2 body
 pb48.p3 body

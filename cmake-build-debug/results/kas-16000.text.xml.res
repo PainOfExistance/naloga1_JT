@@ -356,8 +356,8 @@ pb41.p1 body
 pb41.p2 toc
 pb42.p1 body
 pb42.p2 toc
-pb43.p1 body
-pb43.p2 body
+pb43.p1 toa
+pb43.p2 toa
 pb44.p1 body
 pb44.p2 body
 pb44.p3 body

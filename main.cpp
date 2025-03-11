@@ -35,10 +35,10 @@ vector<Classification> classifyParagraphs(const vector<Paragraph> &paragraphs) {
 
     regex titlePageRegex(R"(UNIVERZA|EKONOMSKA FAKULTETA|DIPLOMSKO DELO)", std::regex_constants::icase);
     regex tocRegex(R"(KAZALO|CONTENTS|\.\.\.\.\.\.\.\.\.\.)", std::regex_constants::icase);
-    regex toaRegex(R"(KAZALO KRATIC)", std::regex_constants::icase);
+    regex toaRegex(R"(KAZALO KRATIC|KRATICE)", std::regex_constants::icase);
     regex abstractSloRegex(R"(POVZETEK)", std::regex_constants::icase);
     regex abstractEnRegex(R"(ABSTRACT)", std::regex_constants::icase);
-    regex abstractDeRegex(R"(ABSTRACT)", std::regex_constants::icase);
+    regex abstractDeRegex(R"(ABSTRAKT|ZUSAMMENFASSUNG)", std::regex_constants::icase);
     regex chapterRegex(R"(>\d+ [A-Za-z \s]+<)", std::regex_constants::icase);
     regex conclusionRegex(R"(>\d+ [SKLEP \s]+<|>\d+ [CONCLUSION \s]+<)", std::regex_constants::icase);
 
@@ -58,6 +58,8 @@ vector<Classification> classifyParagraphs(const vector<Paragraph> &paragraphs) {
             classType = "abstractSlo";
         } else if (regex_search(paragraph.text, abstractEnRegex)) {
             classType = "abstractEn";
+        } else if (regex_search(paragraph.text, abstractDeRegex)) {
+            classType = "abstractDe";
         } else if (regex_search(paragraph.text, conclusionRegex)) {
             classType = "conclusion";
         } else if (regex_search(paragraph.text, chapterRegex)) {
@@ -70,7 +72,8 @@ vector<Classification> classifyParagraphs(const vector<Paragraph> &paragraphs) {
         } else if (!contains(classifications, "chapter") && classType == "body") {
             classifications.push_back({paragraph.id, "front"});
             prevClassType = "front";
-        } else if (classifications.size() > 0 && contains(classifications, "chapter") && !contains(classifications, "conclusion") && classType == "body") {
+        } else if (classifications.size() > 0 && contains(classifications, "chapter") && !contains(
+                       classifications, "conclusion") && classType == "body") {
             classifications.push_back({paragraph.id, "body"});
             prevClassType = "body";
         } else if (classifications.size() > 0 && classifications.end()->classType != "chapter" && classType == "body") {
@@ -81,41 +84,8 @@ vector<Classification> classifyParagraphs(const vector<Paragraph> &paragraphs) {
             prevClassType = classType;
         }
 
-
-        /*if (prevID.substr(0, prevID.find('.')) == paragraph.id.substr(0, paragraph.id.find('.'))) {
-            continue;
-        }
-
-        if (prevID.substr(0, prevID.find('.')) != paragraph.id.substr(0, paragraph.id.find('.')) && classType == "body") {
-            if (classType == "titlePage" || classType == "toc" || classType == "toa") {
-                segments.push_back({paragraph.id.substr(0, paragraph.id.find('.')), "front"});
-            } else if (classType == "abstractSlo" || classType == "abstractEn" || classType == "abstractDe" || classType == "conclusion") {
-                segments.push_back({paragraph.id.substr(0, paragraph.id.find('.')), "back"});
-            } else {
-                segments.push_back({paragraph.id.substr(0, paragraph.id.find('.')), "body"});
-            }
-        }
-
-
-        if (regex_search(paragraph.text, chapterRegex)) {
-            chapters.push_back({
-                paragraph.id.substr(0, paragraph.id.find('.')),
-                paragraph.text.substr(paragraph.id.find('>'), paragraph.id.find('<'))
-            });
-        }*/
-
         prevID = paragraph.id;
     }
-
-    /*
-        for (const auto &seg: segments) {
-            classifications.push_back({seg.id, seg.classType});
-        }
-
-        for (const auto &chapter: chapters) {
-            classifications.push_back({chapter.id, chapter.classType});
-        }
-    */
 
     return classifications;
 }

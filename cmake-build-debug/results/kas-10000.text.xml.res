@@ -564,8 +564,8 @@ pb49.p4 toc
 pb49.p5 toc
 pb49.p6 toc
 pb49.p7 toc
-pb49.p8 toc
-pb49.p9 toc
+pb49.p8 toa
+pb49.p9 toa
 pb50.p1 body
 pb50.p2 body
 pb50.p3 body
